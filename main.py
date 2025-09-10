@@ -3,7 +3,8 @@ from fastapi import FastAPI
 from database import engine
 from sqlmodel import SQLModel
 
-from controllers.category import Category
+from controller.category import CategoryController
+from controller.money import MoneyController
 
 SQLModel.metadata.create_all(bind=engine) #Enity를 가지고 table을 만든다 (SqlModel을 상속받은 얘들만)
 
@@ -11,9 +12,11 @@ app = FastAPI()
 
 ########### Routes ########### 
 
-category = Category()
+category = CategoryController()
+money = MoneyController()
 
 app.include_router(category.router)
+app.include_router(money.router)
 
 ########### Routes ###########
 
