@@ -5,6 +5,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from sqlmodel import Session, select
+from repository.category import CategoryRepository
 
 from models.category import Category as CategoryModel
 from database import get_db
@@ -23,38 +24,26 @@ class CategoryController(Controller):
         self.router.delete("/{id}", response_model=bool)(self.delete_category)
 
     # GET
-    def get_category_list(self, db: Session = Depends(get_db)) -> List[CategoryModel]:
-        results = db.exec(select(CategoryModel)).all()
-        return results
+    def get_category_list(self, count: int = 10, page: int = 0, db: Session = Depends(get_db)) -> List[CategoryModel]:
+        repo = CategoryRepository(db)
+        return repo.getList(page, count)
 
     def get_category(self, id: int, db: Session = Depends(get_db)) -> Optional[CategoryModel]:
-        category = db.get(CategoryModel, id)
-        return category
+        repo = CategoryRepository(db)
+        return repo.getById(id)
 
     # POST
     def create_category(self, category: CategoryModel, db: Session = Depends(get_db)) -> CategoryModel:
-        db.add(category)
-        db.commit()
-        db.refresh(category)
-        return category
+        repo = CategoryRepository(db)
+        return repo.create(category)
+        
 
     # PUT
     def update_category(self, id: int, category: CategoryModel, db: Session = Depends(get_db)) -> Optional[CategoryModel]:
-        origin = db.get(CategoryModel, id)
-        if not origin:
-            return None
-
-        origin = self.update_object(origin, category)
-
-        db.commit()
-        db.refresh(origin)
-        return origin
+        repo = CategoryRepository(db)
+        return repo.update(id, category)
 
     # DELETE
     def delete_category(self, id: int, db: Session = Depends(get_db)) -> bool:
-        category = db.get(CategoryModel, id)
-        if not category:
-            return False
-        db.delete(category)
-        db.commit()
-        return True
+        repo = CategoryRepository(db)
+        return repo.deleteById(id)
