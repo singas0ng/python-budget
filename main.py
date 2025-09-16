@@ -3,6 +3,8 @@ from fastapi import FastAPI
 from database import engine
 from sqlmodel import SQLModel
 
+from fastapi.middleware.cors import CORSMiddleware
+
 from controller.category import CategoryController
 from controller.money import MoneyController
 
@@ -20,8 +22,22 @@ app.include_router(money.router)
 
 ########### Routes ###########
 
+'''
+브라우저에서 http 요쳥을 하면 서버로 들어오고 Router(Controller) 로 가서 쭉쭉 들어가서 로직구현하고 나서 
+다시 Controller 거치고 서버 거쳐서 httpResponse로 브라우저한테 다시 넘김
 
+Browser -> HTTP -> Server -> Middleware -> Router(Controller) -> Logic
+        <-      <-        <-            <-                    <-
 
+미들웨어는 서버랑 라우터 사이 들어감
+'''
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['http://localhost:3000'], # 요청하는 포트 (브라우저가 서버로 요청을 하니까 브라우저 포트 적기)
+    allow_credentials=True, # header 에 토큰 허용해주는거
+    allow_methods=['*'], # GET POST PUT DELETE
+    allow_headers=['*']
+)
 
 
 
